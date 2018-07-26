@@ -1,0 +1,11 @@
+[package]
+name = "uniblock"
+version = "0.1.0"
+authors = ["Iku Iwasa <iku.iwasa@gmail.com>"]
+
+[dependencies]
+failure = "^0.1.1"
+failure_derive = "^0.1.1"
+reqwest = "^0.8.6"
+regex = "^1.0.2"
+lazy_static = "^1.0.2"
