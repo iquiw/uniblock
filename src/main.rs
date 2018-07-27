@@ -23,8 +23,7 @@ struct HttpError {
 #[derive(Debug)]
 struct UnicodeBlock {
     name: String,
-    begin: u32,
-    end: u32,
+    range: (u32, u32),
 }
 
 impl UnicodeBlock {
@@ -32,8 +31,8 @@ impl UnicodeBlock {
         format!(
             "(defconst unicode-block-{} '(#x{:x} . #x{:x}))",
             self.name.replace(" ", "-").to_lowercase(),
-            self.begin,
-            self.end
+            self.range.0,
+            self.range.1
         )
     }
 }
@@ -62,8 +61,10 @@ fn parse_line(line: &str) -> Option<UnicodeBlock> {
     RE.captures(&line).and_then(|c| {
         Some(UnicodeBlock {
             name: c.get(3)?.as_str().to_string(),
-            begin: u32::from_str_radix(c.get(1)?.as_str(), 16).ok()?,
-            end: u32::from_str_radix(c.get(2)?.as_str(), 16).ok()?,
+            range: (
+                u32::from_str_radix(c.get(1)?.as_str(), 16).ok()?,
+                u32::from_str_radix(c.get(2)?.as_str(), 16).ok()?,
+            ),
         })
     })
 }
@@ -84,4 +85,3 @@ fn get_unicode_blocks() -> Result<impl Read, Error> {
 //     use std::fs::File;
 //     Ok(File::open("uniblock.txt")?)
 // }
-
