@@ -6,7 +6,7 @@ extern crate lazy_static;
 extern crate regex;
 extern crate reqwest;
 
-const UNICODE_BLOCK_URL: &str = "http://www.unicode.org/Public/10.0.0/ucd/Blocks.txt";
+const UNICODE_BLOCK_URL: &str = "http://www.unicode.org/Public/11.0.0/ucd/Blocks.txt";
 
 use std::io::{BufRead, BufReader, Read};
 
