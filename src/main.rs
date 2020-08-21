@@ -1,24 +1,9 @@
-extern crate failure;
-#[macro_use]
-extern crate failure_derive;
-#[macro_use]
-extern crate lazy_static;
-extern crate regex;
-extern crate reqwest;
+use async_std::task;
+use lazy_static::lazy_static;
+use regex::Regex;
+use surf;
 
 const UNICODE_BLOCK_URL: &str = "http://www.unicode.org/Public/11.0.0/ucd/Blocks.txt";
-
-use std::io::{BufRead, BufReader, Read};
-
-use failure::Error;
-use regex::Regex;
-use reqwest::StatusCode;
-
-#[derive(Fail, Debug)]
-#[fail(display = "HTTP error, status: {}", status)]
-struct HttpError {
-    status: StatusCode,
-}
 
 #[derive(Debug)]
 struct UnicodeBlock {
@@ -38,20 +23,21 @@ impl UnicodeBlock {
 }
 
 fn main() {
-    match get_unicode_blocks() {
-        Ok(inner) => {
-            let r = BufReader::new(inner);
-            for line in r.lines() {
-                if let Some(uni_block) = parse_line(&line.unwrap()) {
-                    println!("{}", uni_block.to_elisp());
+    task::block_on(async {
+        match get_unicode_blocks().await {
+            Ok(s) => {
+                for line in s.lines() {
+                    if let Some(uni_block) = parse_line(line) {
+                        println!("{}", uni_block.to_elisp());
+                    }
                 }
+                println!("\n(provide 'unicode-block)");
             }
-            println!("\n(provide 'unicode-block)");
+            Err(e) => {
+                eprintln!("{}", e);
+            }
         }
-        Err(e) => {
-            eprintln!("{}", e);
-        }
-    }
+    })
 }
 
 fn parse_line(line: &str) -> Option<UnicodeBlock> {
@@ -69,19 +55,15 @@ fn parse_line(line: &str) -> Option<UnicodeBlock> {
     })
 }
 
-fn get_unicode_blocks() -> Result<impl Read, Error> {
-    let resp = reqwest::get(UNICODE_BLOCK_URL)?;
-
-    if resp.status().is_success() {
-        Ok(resp)
-    } else {
-        Err(HttpError {
-            status: resp.status(),
-        }.into())
-    }
+async fn get_unicode_blocks() -> Result<String, surf::Exception> {
+    surf::get(UNICODE_BLOCK_URL).recv_string().await
 }
 
-// fn get_unicode_blocks() -> Result<impl Read, Error> {
+// async fn get_unicode_blocks() -> Result<String, surf::Exception> {
+//     use std::io::Read;
 //     use std::fs::File;
-//     Ok(File::open("uniblock.txt")?)
+//     let mut s = String::new();
+//     let mut f = File::open("unicode.txt")?;
+//     f.read_to_string(&mut s)?;
+//     Ok(s)
 // }
