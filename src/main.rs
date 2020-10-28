@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::io::Read;
+
 use async_std::task;
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -12,10 +15,17 @@ struct UnicodeBlock {
 }
 
 impl UnicodeBlock {
+    fn to_symbol(&self) -> String {
+        format!(
+            "unicode-block-{}",
+            self.name.replace(" ", "-").to_lowercase()
+        )
+    }
+
     fn to_elisp(&self) -> String {
         format!(
-            "(defconst unicode-block-{} '(#x{:x} . #x{:x}))",
-            self.name.replace(" ", "-").to_lowercase(),
+            "(defconst {} '(#x{:x} . #x{:x}))",
+            self.to_symbol(),
             self.range.0,
             self.range.1
         )
@@ -26,12 +36,22 @@ fn main() {
     task::block_on(async {
         match get_unicode_blocks().await {
             Ok(s) => {
+                let mut v = vec![];
                 for line in s.lines() {
                     if let Some(uni_block) = parse_line(line) {
                         println!("{}", uni_block.to_elisp());
+                        v.push(uni_block);
                     }
                 }
-                println!("\n(provide 'unicode-block)");
+                print!("\n(defconst unicode-blocks\n  '(");
+                for uni_block in v {
+                    print!("{}\n    ", uni_block.to_symbol());
+                }
+                println!("))");
+                match read_footer() {
+                    Ok(footer) => println!("{}", footer),
+                    Err(e) => eprintln!("Err: {}", e),
+                }
             }
             Err(e) => {
                 eprintln!("{}", e);
@@ -55,13 +75,18 @@ fn parse_line(line: &str) -> Option<UnicodeBlock> {
     })
 }
 
+fn read_footer() -> surf::Result<String> {
+    let mut s = String::new();
+    let mut f = File::open("assets/footer.el")?;
+    f.read_to_string(&mut s)?;
+    Ok(s)
+}
+
 async fn get_unicode_blocks() -> surf::Result<String> {
     surf::get(UNICODE_BLOCK_URL).recv_string().await
 }
 
-// async fn get_unicode_blocks() -> Result<String, surf::Exception> {
-//     use std::io::Read;
-//     use std::fs::File;
+// async fn get_unicode_blocks() -> surf::Result<String> {
 //     let mut s = String::new();
 //     let mut f = File::open("unicode.txt")?;
 //     f.read_to_string(&mut s)?;
