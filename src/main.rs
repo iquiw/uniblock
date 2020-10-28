@@ -55,7 +55,7 @@ fn parse_line(line: &str) -> Option<UnicodeBlock> {
     })
 }
 
-async fn get_unicode_blocks() -> Result<String, surf::Exception> {
+async fn get_unicode_blocks() -> surf::Result<String> {
     surf::get(UNICODE_BLOCK_URL).recv_string().await
 }
 
