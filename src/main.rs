@@ -49,7 +49,7 @@ fn main() {
                 }
                 println!("))");
                 match read_footer() {
-                    Ok(footer) => println!("{}", footer),
+                    Ok(footer) => print!("{}", footer),
                     Err(e) => eprintln!("Err: {}", e),
                 }
             }
