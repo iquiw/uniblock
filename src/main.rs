@@ -6,7 +6,7 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use surf;
 
-const UNICODE_BLOCK_URL: &str = "http://www.unicode.org/Public/13.0.0/ucd/Blocks.txt";
+const UNICODE_BLOCK_URL: &str = "https://www.unicode.org/Public/14.0.0/ucd/Blocks.txt";
 
 #[derive(Debug)]
 struct UnicodeBlock {
