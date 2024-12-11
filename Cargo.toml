@@ -2,10 +2,9 @@
 name = "uniblock"
 version = "0.1.0"
 authors = ["Iku Iwasa <iku.iwasa@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 regex = "^1.4.1"
-lazy_static = "^1.4.0"
 surf = "^2.1.0"
 async-std = "^1.6.3"

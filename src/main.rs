@@ -1,8 +1,8 @@
 use std::fs::File;
 use std::io::Read;
+use std::sync::OnceLock;
 
 use async_std::task;
-use lazy_static::lazy_static;
 use regex::Regex;
 use surf;
 
@@ -61,10 +61,9 @@ fn main() {
 }
 
 fn parse_line(line: &str) -> Option<UnicodeBlock> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"^([0-9A-F]+)\.\.([0-9A-F]+); (.*)$").unwrap();
-    }
-    RE.captures(&line).and_then(|c| {
+    static RE_CELL: OnceLock<Regex> = OnceLock::new();
+    let re = RE_CELL.get_or_init(|| Regex::new(r"^([0-9A-F]+)\.\.([0-9A-F]+); (.*)$").unwrap());
+    re.captures(&line).and_then(|c| {
         Some(UnicodeBlock {
             name: c.get(3)?.as_str().to_string(),
             range: (
