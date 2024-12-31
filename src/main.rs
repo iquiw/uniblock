@@ -4,7 +4,7 @@ use std::sync::OnceLock;
 
 use async_std::task;
 use regex::Regex;
-use surf;
+use ureq;
 
 const UNICODE_BLOCK_URL: &str = "https://www.unicode.org/Public/15.0.0/ucd/Blocks.txt";
 
@@ -34,7 +34,7 @@ impl UnicodeBlock {
 
 fn main() {
     task::block_on(async {
-        match get_unicode_blocks().await {
+        match get_unicode_blocks() {
             Ok(s) => {
                 let mut v = vec![];
                 for line in s.lines() {
@@ -74,15 +74,15 @@ fn parse_line(line: &str) -> Option<UnicodeBlock> {
     })
 }
 
-fn read_footer() -> surf::Result<String> {
+fn read_footer() -> Result<String, ureq::Error> {
     let mut s = String::new();
     let mut f = File::open("assets/footer.el")?;
     f.read_to_string(&mut s)?;
     Ok(s)
 }
 
-async fn get_unicode_blocks() -> surf::Result<String> {
-    surf::get(UNICODE_BLOCK_URL).recv_string().await
+fn get_unicode_blocks() -> Result<String, ureq::Error> {
+    Ok(ureq::get(UNICODE_BLOCK_URL).call()?.into_string()?)
 }
 
 // async fn get_unicode_blocks() -> surf::Result<String> {
