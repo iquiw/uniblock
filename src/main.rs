@@ -6,7 +6,7 @@ use async_std::task;
 use regex::Regex;
 use ureq;
 
-const UNICODE_BLOCK_URL: &str = "https://www.unicode.org/Public/15.0.0/ucd/Blocks.txt";
+const UNICODE_BLOCK_URL: &str = "https://www.unicode.org/Public/15.1.0/ucd/Blocks.txt";
 
 #[derive(Debug)]
 struct UnicodeBlock {
