@@ -82,7 +82,7 @@ fn read_footer() -> Result<String, ureq::Error> {
 }
 
 fn get_unicode_blocks() -> Result<String, ureq::Error> {
-    Ok(ureq::get(UNICODE_BLOCK_URL).call()?.into_string()?)
+    Ok(ureq::get(UNICODE_BLOCK_URL).call()?.body_mut().read_to_string()?)
 }
 
 // async fn get_unicode_blocks() -> surf::Result<String> {

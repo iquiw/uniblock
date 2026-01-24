@@ -7,4 +7,4 @@ edition = "2021"
 [dependencies]
 regex = "^1.4.1"
 async-std = "^1.6.3"
-ureq = "2.12.1"
+ureq = "3.1.4"
