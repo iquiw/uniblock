@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::Read;
 use std::sync::OnceLock;
 
-use async_std::task;
 use regex::Regex;
 use ureq;
 
@@ -33,31 +32,29 @@ impl UnicodeBlock {
 }
 
 fn main() {
-    task::block_on(async {
-        match get_unicode_blocks() {
-            Ok(s) => {
-                let mut v = vec![];
-                for line in s.lines() {
-                    if let Some(uni_block) = parse_line(line) {
-                        println!("{}", uni_block.to_elisp());
-                        v.push(uni_block);
-                    }
-                }
-                print!("\n(defconst unicode-blocks\n  '(");
-                for uni_block in v {
-                    print!("{}\n    ", uni_block.to_symbol());
-                }
-                println!("))");
-                match read_footer() {
-                    Ok(footer) => print!("{}", footer),
-                    Err(e) => eprintln!("Err: {}", e),
+    match get_unicode_blocks() {
+        Ok(s) => {
+            let mut v = vec![];
+            for line in s.lines() {
+                if let Some(uni_block) = parse_line(line) {
+                    println!("{}", uni_block.to_elisp());
+                    v.push(uni_block);
                 }
             }
-            Err(e) => {
-                eprintln!("{}", e);
+            print!("\n(defconst unicode-blocks\n  '(");
+            for uni_block in v {
+                print!("{}\n    ", uni_block.to_symbol());
+            }
+            println!("))");
+            match read_footer() {
+                Ok(footer) => print!("{}", footer),
+                Err(e) => eprintln!("Err: {}", e),
             }
         }
-    })
+        Err(e) => {
+            eprintln!("{}", e);
+        }
+    }
 }
 
 fn parse_line(line: &str) -> Option<UnicodeBlock> {
